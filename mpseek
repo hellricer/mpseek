@@ -1,0 +1,81 @@
+#!/usr/bin/env bash
+#
+# mpseek - conditional search queries for mpd
+
+MPD_FIELDS="file name artist album albumartist comment composer date genre performer title"
+
+join_by() {
+    local IFS="$1"; shift; echo "$*";
+}
+
+array_index() {
+    local seeking=$1; shift
+    local idx=0
+    for opt; do
+        ((idx++))
+        if [[ $opt == $seeking ]]; then
+            break
+        fi
+    done
+    echo $idx
+}
+
+fulltext_func() {
+    local arg="$1"; shift
+    if (( $# )); then
+        grep -ie "$arg" | fulltext_func "$@"
+    else
+        grep -ie "$arg"
+    fi
+}
+
+filter() {
+    query="$@"
+
+    declare -a fields=(${MPD_FIELDS[@]})
+    declare -a format_fields=()
+    for field in "${fields[@]}"; do
+        format_fields+=("%${field}%")
+    done
+    local format=$(join_by "^" "${format_fields[@]}")
+
+    IFS=$'\n' queries=( $(xargs -n1 <<< $query) )
+    local condition=
+    declare -a fulltext=()
+    for q in "${queries[@]}"; do
+        if [[ "$q" =~ "&&" ]] || [[ "$q" == "||" ]] ||\
+            [[ "$q" == "(" ]] || [[ "$q" == ")" ]]; then
+            condition+=" $q "
+        elif [[ "$q" =~ [a-z]*=.* ]]; then
+            local key="${q%%=*}"
+            local idx=$(array_index "$key" "${fields[@]}")
+            local value="${q##*=}"
+            value=${value//=/==}
+            condition+="tolower(\$${idx})==\"${value,,}\""
+        elif [[ "$q" =~ [a-z]~.* ]]; then
+            local key="${q%%~*}"
+            local idx=$(array_index "$key" "${fields[@]}")
+            local value="${q##*~}"
+            condition+="tolower(\$${idx})~/${value,,}/"
+        elif [[ "$q" =~ [a-z]*\<.* ]]; then
+            local key="${q%%<*}"
+            local idx=$(array_index "$key" "${fields[@]}")
+            local value="${q##*<}"
+            condition+="\$${idx}<${value}"
+        elif [[ "$q" =~ [a-z]*\>.* ]]; then
+            local key="${q%%>*}"
+            local idx=$(array_index "$key" "${fields[@]}")
+            local value="${q##*>}"
+            condition+="\$${idx}>${value}"
+        else
+            fulltext+=($q)
+        fi
+    done
+
+    mpc listall --format "$format" |\
+        awk -F"^" "${condition:-1}" |\
+        fulltext_func "${fulltext[@]}" |\
+        awk -F"^" '{print $1}'
+}
+
+filter "$@"
