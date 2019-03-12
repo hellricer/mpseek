@@ -12,7 +12,7 @@ Conditional search queries for Music Player Daemon (MPD).
 
     $ mpseek jazz
 
-    $ mpseek michael jackson album=thriller
+    $ mpseek "michael jackson" album=thriller
 
     $ mpseek "genre~mpb|latin|sosa brazil"
 
