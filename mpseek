@@ -13,7 +13,7 @@ array_index() {
     local idx=0
     for opt; do
         ((idx++))
-        if [[ $opt == $seeking ]]; then
+        if [[ $opt == "$seeking" ]]; then
             break
         fi
     done
@@ -30,45 +30,46 @@ fulltext_func() {
 }
 
 filter() {
-    query="$@"
+    local query condition format
 
     declare -a fields=(${MPD_FIELDS[@]})
     declare -a format_fields=()
     for field in "${fields[@]}"; do
         format_fields+=("%${field}%")
     done
-    local format=$(join_by "^" "${format_fields[@]}")
+    format=$(join_by "^" "${format_fields[@]}")
 
-    IFS=$'\n' queries=( $(xargs -n1 <<< $query) )
-    local condition=
+    query="$*"
+    IFS=$'\n' queries=($(xargs -n1 <<< "$query"))
+    local key idx value
     declare -a fulltext=()
     for q in "${queries[@]}"; do
         if [[ "$q" =~ "&&" ]] || [[ "$q" == "||" ]] ||\
             [[ "$q" == "(" ]] || [[ "$q" == ")" ]]; then
             condition+=" $q "
         elif [[ "$q" =~ [a-z]+= ]]; then
-            local key="${q%%=*}"
-            local idx=$(array_index "$key" "${fields[@]}")
-            local value="${q##*=}"
+            key="${q%%=*}"
+            idx=$(array_index "$key" "${fields[@]}")
+            value="${q##*=}"
             value=${value//=/==}
             condition+="tolower(\$${idx})==\"${value,,}\""
         elif [[ "$q" =~ [a-z]+~ ]]; then
-            local key="${q%%~*}"
-            local idx=$(array_index "$key" "${fields[@]}")
-            local value="${q##*~}"
+            key="${q%%~*}"
+            idx=$(array_index "$key" "${fields[@]}")
+            value="${q##*~}"
             condition+="tolower(\$${idx})~/${value,,}/"
         elif [[ "$q" =~ [a-z]+\< ]]; then
-            local key="${q%%<*}"
-            local idx=$(array_index "$key" "${fields[@]}")
-            local value="${q##*<}"
+            key="${q%%<*}"
+            idx=$(array_index "$key" "${fields[@]}")
+            value="${q##*<}"
             condition+="\$${idx}<${value}"
         elif [[ "$q" =~ [a-z]+\> ]]; then
-            local key="${q%%>*}"
-            local idx=$(array_index "$key" "${fields[@]}")
-            local value="${q##*>}"
+            key="${q%%>*}"
+            idx=$(array_index "$key" "${fields[@]}")
+            value="${q##*>}"
             condition+="\$${idx}>${value}"
         else
-            fulltext+=($q)
+            fulltext+=("$q")
         fi
     done
 
