@@ -14,10 +14,11 @@ array_index() {
     for opt; do
         ((idx++))
         if [[ $opt == "$seeking" ]]; then
+            echo $idx
             break
         fi
     done
-    echo $idx
+    false
 }
 
 fulltext_func() {
@@ -50,22 +51,25 @@ filter() {
         elif [[ "$q" =~ [a-z]+= ]]; then
             key="${q%%=*}"
             idx=$(array_index "$key" "${fields[@]}")
+            (( idx )) || break
             value="${q##*=}"
             value=${value//=/==}
             condition+="tolower(\$${idx})==\"${value,,}\""
         elif [[ "$q" =~ [a-z]+~ ]]; then
             key="${q%%~*}"
             idx=$(array_index "$key" "${fields[@]}")
+            (( idx )) || break
             value="${q##*~}"
             condition+="tolower(\$${idx})~/${value,,}/"
         elif [[ "$q" =~ [a-z]+\< ]]; then
             key="${q%%<*}"
             idx=$(array_index "$key" "${fields[@]}")
+            (( idx )) || break
             value="${q##*<}"
-            condition+="\$${idx}<${value}"
         elif [[ "$q" =~ [a-z]+\> ]]; then
             key="${q%%>*}"
             idx=$(array_index "$key" "${fields[@]}")
+            (( idx )) || break
             value="${q##*>}"
             condition+="\$${idx}>${value}"
         else
@@ -73,10 +77,11 @@ filter() {
         fi
     done
 
-    mpc listall --format "$format" |\
-        awk -F"^" "${condition:-1}" 2>&- |\
-        fulltext_func "${fulltext[@]}" |\
-        awk -F"^" '{print $1}'
+    (( ${#condition} || ${#fulltext[@]} )) && \
+        mpc listall --format "$format" |\
+            awk -F"^" "${condition:-1}" 2>&- |\
+            fulltext_func "${fulltext[@]}" |\
+            awk -F"^" '{print $1}'
 }
 
 filter "$@"
