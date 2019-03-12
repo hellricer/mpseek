@@ -14,9 +14,9 @@ Conditional search queries for Music Player Daemon (MPD).
 
     $ mpseek "michael jackson" album=thriller
 
-    $ mpseek "genre~mpb|latin|sosa brazil"
+    $ mpseek "genre~mpb|latin|soca brazil"
 
-    $ mpseek 'genre~"hip hop" && date~199[0-9]'
+    $ mpseek 'genre~"hip hop" && date>1990'
 
     $ mpseek "( genre~funk || album~funk ) && file~flac"
 ```
