@@ -46,23 +46,23 @@ filter() {
         if [[ "$q" =~ "&&" ]] || [[ "$q" == "||" ]] ||\
             [[ "$q" == "(" ]] || [[ "$q" == ")" ]]; then
             condition+=" $q "
-        elif [[ "$q" =~ [a-z]*=.* ]]; then
+        elif [[ "$q" =~ [a-z]+= ]]; then
             local key="${q%%=*}"
             local idx=$(array_index "$key" "${fields[@]}")
             local value="${q##*=}"
             value=${value//=/==}
             condition+="tolower(\$${idx})==\"${value,,}\""
-        elif [[ "$q" =~ [a-z]~.* ]]; then
+        elif [[ "$q" =~ [a-z]+~ ]]; then
             local key="${q%%~*}"
             local idx=$(array_index "$key" "${fields[@]}")
             local value="${q##*~}"
             condition+="tolower(\$${idx})~/${value,,}/"
-        elif [[ "$q" =~ [a-z]*\<.* ]]; then
+        elif [[ "$q" =~ [a-z]+\< ]]; then
             local key="${q%%<*}"
             local idx=$(array_index "$key" "${fields[@]}")
             local value="${q##*<}"
             condition+="\$${idx}<${value}"
-        elif [[ "$q" =~ [a-z]*\>.* ]]; then
+        elif [[ "$q" =~ [a-z]+\> ]]; then
             local key="${q%%>*}"
             local idx=$(array_index "$key" "${fields[@]}")
             local value="${q##*>}"
