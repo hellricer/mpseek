@@ -23,9 +23,9 @@ array_index() {
 fulltext_func() {
     local arg="$1"; shift
     if (( $# )); then
-        grep -ie "$arg" | fulltext_func "$@"
+        awk -v IGNORECASE=1 "/$arg/" | fulltext_func "$@"
     else
-        grep -ie "$arg"
+        awk -v IGNORECASE=1 "/$arg/"
     fi
 }
 
