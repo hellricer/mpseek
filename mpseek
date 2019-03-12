@@ -73,7 +73,7 @@ filter() {
     done
 
     mpc listall --format "$format" |\
-        awk -F"^" "${condition:-1}" |\
+        awk -F"^" "${condition:-1}" 2>&- |\
         fulltext_func "${fulltext[@]}" |\
         awk -F"^" '{print $1}'
 }
