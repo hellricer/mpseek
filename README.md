@@ -25,3 +25,5 @@ Conditional search queries for Music Player Daemon (MPD).
 
  - `bash`
  - `awk`
+ - `xargs`
+ - `mpc`
