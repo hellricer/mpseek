@@ -27,3 +27,21 @@ Conditional search queries for Music Player Daemon (MPD).
  - `awk`
  - `xargs`
  - `mpc`
+
+## Simple interactive prompt with history
+
+```sh
+
+#!/usr/bin/env bash
+
+while true; do
+    clear
+    query=""
+    read -p '> ' -e query
+    if (( ${#query} )); then
+        history -s "$query"
+        mpc clear >&-
+        mpseek "$query" | mpc add
+    fi
+done
+```
