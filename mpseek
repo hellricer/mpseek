@@ -53,14 +53,13 @@ filter() {
             idx=$(array_index "$key" "${fields[@]}")
             (( idx )) || break
             value="${q##*=}"
-            value=${value//=/==}
-            condition+="tolower(\$${idx})==\"${value,,}\""
-        elif [[ "$q" =~ [a-z]+~ ]]; then
-            key="${q%%~*}"
+            condition+="tolower(\$${idx})~/${value,,}/"
+        elif [[ "$q" =~ [a-z]+!= ]]; then
+            key="${q%%!*}"
             idx=$(array_index "$key" "${fields[@]}")
             (( idx )) || break
-            value="${q##*~}"
-            condition+="tolower(\$${idx})~/${value,,}/"
+            value="${q##*=}"
+            condition+="tolower(\$${idx})!~/${value,,}/"
         elif [[ "$q" =~ [a-z]+\< ]]; then
             key="${q%%<*}"
             idx=$(array_index "$key" "${fields[@]}")
