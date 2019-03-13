@@ -10,15 +10,15 @@ Conditional search queries for Music Player Daemon (MPD).
 
 ```sh
 
- $ mpseek jazz
+$ mpseek jazz
 
- $ mpseek '"michael jackson" album!=thriller'
+$ mpseek '"michael jackson" album!=thriller'
 
- $ mpseek "genre=mpb|latin|soca brazil"
+$ mpseek "genre=mpb|latin|soca brazil"
 
- $ mpseek 'genre="hip hop" && date>1990'
+$ mpseek 'genre="hip hop" && date>1990'
 
- $ mpseek "( genre=funk || album=funk ) && file=flac$"
+$ mpseek "( genre=funk || album=funk ) && file=flac$"
 ```
 
 ## Dependencies
